@@ -12,5 +12,17 @@ socket.on('disconnect',function() {
 // });
 
 socket.on('newMessage',function(data){
-  console.log(data);
+  var li = jQuery('<li></li>');
+  li.text(`${data.from} : ${data.text}`);
+
+  jQuery('#olTag').append(li);
+});
+
+jQuery('#message_form').on('submit',function(e) {
+  e.preventDefault();
+
+  socket.emit('createMessage',{
+    from : "User",
+    text : jQuery("#textbox").val()
+  })
 });
