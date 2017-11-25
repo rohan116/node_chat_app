@@ -21,13 +21,20 @@ io.on('connection',(socket) => {
   socket.emit('newMessage',generateMessage("admin","Welcome to chat app"));
   socket.broadcast.emit('newMessage',generateMessage("admim","New User joined"));
 
-  socket.on('createMessage',(data) => {
+  socket.on('createMessage',(data,callback) => {
     io.emit('newMessage',generateMessage(data.from,data.text));
+    callback();
   });
 
-  socket.on('geoLocation',function(data){
+  socket.on('geoLocation',function(data,callback){
     io.emit('newLocationMessage',generateLocationMessage('admin',data.latitude,data.longitude));
+    callback();
+  });
+
+  socket.on('typing',function(data){
+    socket.broadcast.emit('typingMessage',data);
   })
+
 
   socket.on('disconnect',() => {
     console.log('User Disconnected');
