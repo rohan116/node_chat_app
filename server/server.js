@@ -3,7 +3,7 @@ const express = require('express');
 const socketIO = require('socket.io');
 const http = require('http');
 
-const {generateMessage} = require('./utils/message.js')
+const {generateMessage,generateLocationMessage} = require('./utils/message.js')
 var publicPath = path.join(__dirname,'/../public');
 const port = process.env.PORT || 3000;
 //console.log(publicPath);
@@ -24,6 +24,10 @@ io.on('connection',(socket) => {
   socket.on('createMessage',(data) => {
     io.emit('newMessage',generateMessage(data.from,data.text));
   });
+
+  socket.on('geoLocation',function(data){
+    io.emit('newLocationMessage',generateLocationMessage('admin',data.latitude,data.longitude));
+  })
 
   socket.on('disconnect',() => {
     console.log('User Disconnected');
