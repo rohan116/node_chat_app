@@ -37,7 +37,7 @@ io.on('connection',(socket) => {
 
 
   socket.on('disconnect',() => {
-    io.emit('newMessage',generateMessage("admim","User Disconnected"));
+    io.emit('newMessage',generateMessage("Admin","User Disconnected"));
     console.log('User Disconnected');
   });
 });
