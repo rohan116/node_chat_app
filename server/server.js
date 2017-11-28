@@ -18,7 +18,7 @@ io.on('connection',(socket) => {
   console.log('New User connected');
 
   //New User Joined (Message from admin and broadcast to others that a new user joined)
-  socket.emit('newMessage',generateMessage("admin","Welcome to chat app"));
+  socket.emit('newMessage',generateMessage("Admin","Welcome to chat app"));
   socket.broadcast.emit('newMessage',generateMessage("admim","New User joined"));
 
   socket.on('createMessage',(data,callback) => {
@@ -27,7 +27,7 @@ io.on('connection',(socket) => {
   });
 
   socket.on('geoLocation',function(data,callback){
-    io.emit('newLocationMessage',generateLocationMessage('admin',data.latitude,data.longitude));
+    io.emit('newLocationMessage',generateLocationMessage('User',data.latitude,data.longitude));
     callback();
   });
 
@@ -37,6 +37,7 @@ io.on('connection',(socket) => {
 
 
   socket.on('disconnect',() => {
+    io.emit('newMessage',generateMessage("admim","User Disconnected"));
     console.log('User Disconnected');
   });
 });

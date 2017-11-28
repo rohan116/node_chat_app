@@ -7,6 +7,7 @@ socket.on('disconnect',function() {
   console.log('Disconnected from the server')
 });
 
+
 // socket.on('newEmail',function(data){
 //   console.log(data);
 // });
@@ -41,21 +42,41 @@ $('#textbox').keyup(function() {
 
 socket.on('newMessage',function(data){
   var formattedTime = moment(data.createdBy).format('h:mm a');
-  var li = jQuery('<li></li>');
-  li.text(`${data.from} ${formattedTime} : ${data.text}`);
+  var template = jQuery("#message_template").html();
+  var html = Mustache.render(template,{
+    from : data.from,
+    text : data.text,
+    createdBy : formattedTime
+  });
+  jQuery("#olTag").append(html);
 
-  jQuery('#olTag').append(li);
+  //Old Way to render page
+  // var formattedTime = moment(data.createdBy).format('h:mm a');
+  // var li = jQuery('<li></li>');
+  // li.text(`${data.from} ${formattedTime} : ${data.text}`);
+  //
+  // jQuery('#olTag').append(li);
 });
 
 socket.on('newLocationMessage',function(message){
   var time = moment(message.createdBy).format('h:mm a');
-  var li = jQuery('<li></li>');
-  var a = jQuery('<a target="_blank">My Current Location</a>');
+  var template = jQuery("#location_message_template").html();
+  console.log(template);
+  var html = Mustache.render(template,{
+    from : message.from,
+    url : message.url,
+    createdBy : time
+  })
+  jQuery('#olTag').append(html);
 
-  li.text(message.from + " " +time+ " : ");
-  a.attr('href',message.url);
-  li.append(a);
-  jQuery('#olTag').append(li);
+  //old render technique
+  // var li = jQuery('<li></li>');
+  // var a = jQuery('<a target="_blank">My Current Location</a>');
+  //
+  // li.text(message.from + " " +time+ " : ");
+  // a.attr('href',message.url);
+  // li.append(a);
+  //jQuery('#olTag').append(li);
 });
 
 jQuery('#message_form').on('submit',function(e) {
