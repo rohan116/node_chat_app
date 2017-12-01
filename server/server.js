@@ -37,12 +37,18 @@ io.on('connection',(socket) => {
   });
 
   socket.on('createMessage',(data,callback) => {
-    io.emit('newMessage',generateMessage(data.from,data.text));
+    var user = users.getUser(socket.id);
+    if(user){
+        io.to(user.room.toUpperCase()).emit('newMessage',generateMessage(user.name,data.text));
+    }
     callback();
   });
 
   socket.on('geoLocation',function(data,callback){
-    io.emit('newLocationMessage',generateLocationMessage('User',data.latitude,data.longitude));
+    var user = users.getUser(socket.id);
+    if(user){
+        io.to(user.room.toUpperCase()).emit('newLocationMessage',generateLocationMessage(user.name,data.latitude,data.longitude));
+    }
     callback();
   });
 

@@ -128,7 +128,6 @@ jQuery('#message_form').on('submit',function(e) {
   console.log(isRealStringData(textboxValue));
   if(isRealStringData(textboxValue)){
     socket.emit('createMessage',{
-      from : "User",
       text : textboxValue
     },function(){
        jQuery("#textbox").val('');
@@ -145,7 +144,7 @@ send_location.on('click',function(){
   if(!navigator.geolocation){
     return alert('Browser doesnt support geolocation')
   }
-send_location.attr('disabled','disabled').text('Semding Location...');
+send_location.attr('disabled','disabled').text('Sending Location...');
   navigator.geolocation.getCurrentPosition(function(position){
     console.log(position);
     socket.emit('geoLocation',{
