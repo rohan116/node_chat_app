@@ -2,6 +2,8 @@ const path = require('path');
 const express = require('express');
 const socketIO = require('socket.io');
 const http = require('http');
+const {isRealString} = require('./utils/validation');
+const {Users} = require('./utils/users');
 
 const {generateMessage,generateLocationMessage} = require('./utils/message.js')
 var publicPath = path.join(__dirname,'/../public');
@@ -11,15 +13,28 @@ var app = express();
 
 var server = http.createServer(app);
 var io = socketIO(server);
-
+var users = new Users();
 app.use(express.static(publicPath));
 
 io.on('connection',(socket) => {
   console.log('New User connected');
 
   //New User Joined (Message from admin and broadcast to others that a new user joined)
-  socket.emit('newMessage',generateMessage("Admin","Welcome to chat app"));
-  socket.broadcast.emit('newMessage',generateMessage("Admin","New User joined"));
+
+  socket.on('join',(params,callback) => {
+      if(!isRealString(params.name) || !isRealString(params.room))
+      {
+        return callback('Name and room are mandatory');
+      }
+      socket.join(params.room.toUpperCase());
+      users.removeUser(socket.id);
+      users.addUser(socket.id,params.name,params.room);
+
+      io.to(params.room.toUpperCase()).emit('updateUserList',users.getUserList(params.room));
+      socket.emit('newMessage',generateMessage("Admin","Welcome to chat app"));
+      socket.broadcast.to(params.room.toUpperCase()).emit('newMessage',generateMessage("Admin",`${params.name} has joined`));
+      callback();
+  });
 
   socket.on('createMessage',(data,callback) => {
     io.emit('newMessage',generateMessage(data.from,data.text));
@@ -37,8 +52,12 @@ io.on('connection',(socket) => {
 
 
   socket.on('disconnect',() => {
-    io.emit('newMessage',generateMessage("Admin","User Disconnected"));
-    console.log('User Disconnected');
+    var user = users.removeUser(socket.id);
+    console.log(user);
+    if(user){
+      io.to(user.room.toUpperCase()).emit('updateUserList',users.getUserList(user.room));
+      io.to(user.room.toUpperCase()).emit('newMessage',generateMessage('Admin',`${user.name} has left.`));
+    }
   });
 });
 

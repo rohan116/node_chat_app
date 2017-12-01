@@ -1,12 +1,4 @@
 var socket = io();
-socket.on('connect' ,function() {
-  console.log('Connected to server')
-});
-
-socket.on('disconnect',function() {
-  console.log('Disconnected from the server')
-});
-
 function scrollAutomatically(){
   //Selectors
   var messages =  jQuery("#olTag");
@@ -25,9 +17,30 @@ function scrollAutomatically(){
 
 }
 
+socket.on('connect' ,function() {
+  var params = jQuery.deparam(window.location.search);
+
+  socket.emit('join',params,function(err){
+    if(err){
+        alert('Name and room are mandatory');
+        window.location.href = '/';
+    }
+    else{
+
+    }
+  });
+});
+
+socket.on('disconnect',function() {
+  console.log('Disconnected from the server')
+});
+
 // socket.on('newEmail',function(data){
 //   console.log(data);
 // });
+function isRealStringData(str){
+  return typeof str === "string" && str.trim().length > 0
+}
 var timeout;
 var typing;
 
@@ -56,6 +69,17 @@ $('#textbox').keyup(function() {
     }
 });
 
+//Update user list
+socket.on('updateUserList',function(users){
+  console.log(users);
+  var ol = jQuery('<ol></ol>');
+
+  users.forEach(function(user){
+    ol.append(jQuery('<li></li>').text(user));
+  })
+
+  jQuery("#users").html(ol);
+})
 
 socket.on('newMessage',function(data){
   var formattedTime = moment(data.createdBy).format('h:mm a');
@@ -100,8 +124,9 @@ socket.on('newLocationMessage',function(message){
 
 jQuery('#message_form').on('submit',function(e) {
   e.preventDefault();
-  var textboxValue = jQuery("#textbox").val()
-  if(textboxValue.length>0){
+  var textboxValue = jQuery("#textbox").val();
+  console.log(isRealStringData(textboxValue));
+  if(isRealStringData(textboxValue)){
     socket.emit('createMessage',{
       from : "User",
       text : textboxValue
